@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký lịch họp</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        background: #f8f9fa;
+      }
+      .form-wrap {
+        max-width: 700px;
+        margin: 30px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="form-wrap">
+        <h3 class="text-center mb-4">📅 Đăng ký lịch họp</h3>
+
+        <form id="formDangKy">
+          <div class="mb-3">
+            <label class="form-label">Tên cuộc họp</label>
+            <input type="text" class="form-control" name="tenhop" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Phòng họp</label>
+            <select class="form-select" name="phong">
+              <option value="Phòng 1">Phòng họp 1</option>
+              <option value="Phòng 2">Phòng họp 2</option>
+              <option value="Phòng lớn">Phòng họp lớn</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Ngày họp</label>
+              <input type="date" class="form-control" name="ngay" required />
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Giờ họp</label>
+              <input type="time" class="form-control" name="gio" required />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Người chủ trì</label>
+            <input type="text" class="form-control" name="chutri" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Thành phần tham dự</label>
+            <textarea class="form-control" name="thanhphan"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Nội dung</label>
+            <textarea class="form-control" name="noidung"></textarea>
+          </div>
+
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary px-4">
+              Gửi đăng ký
+            </button>
+          </div>
+        </form>
+
+        <p id="ketqua" class="text-center mt-3 fw-bold"></p>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("formDangKy")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const form = e.target;
+          const formData = new FormData(form);
+
+          // 🔗 DÁN LINK WEB APP CỦA BẠN VÀO ĐÂY
+          const url =
+            "https://script.google.com/macros/s/AKfycbz4LtV7Ebpd52oZO1SyrmBXfvvvT8avR3KWh06sdXLgBxbHze9gZOt94mmuxYA6DN6zGg/exec";
+
+          const res = await fetch(url, {
+            method: "POST",
+            body: formData,
+          });
+
+          const text = await res.text();
+          document.getElementById("ketqua").innerText =
+            text === "OK" ? "✔️ Gửi thành công!" : "❌ Lỗi: " + text;
+
+          form.reset();
+        });
+    </script>
+  </body>
+</html>
