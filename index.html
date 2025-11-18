@@ -70,7 +70,7 @@
           e.preventDefault();
           const form = e.target;
 
-          const formData = new FormData(form); // dùng FormData → không CORS
+          const formData = new FormData(form);
 
           const notify = document.getElementById("notify");
           notify.innerHTML = "⏳ Đang gửi...";
@@ -80,6 +80,7 @@
               method: "POST",
               body: formData,
             });
+
             const text = await res.text();
 
             if (text.includes("success")) {
