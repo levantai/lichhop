@@ -3,140 +3,203 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Form Đăng Ký Lịch Họp</title>
+    <title>Form Đăng Ký Lịch Họp - Bootstrap</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <style>
-      /* CSS cơ bản để form dễ nhìn hơn */
-      body {
-        font-family: sans-serif;
-        padding: 20px;
-        background-color: #f4f4f4;
-      }
-      .container {
-        max-width: 600px;
-        margin: auto;
-        background: white;
+      /* Tùy chỉnh nhỏ để căn giữa form */
+      .form-container {
+        max-width: 650px;
+        margin: 50px auto;
         padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      }
-      h2 {
-        text-align: center;
-        color: #333;
-      }
-      label {
-        display: block;
-        margin-top: 15px;
-        font-weight: bold;
-      }
-      input[type="text"],
-      input[type="datetime-local"],
-      textarea {
-        width: 100%;
-        padding: 10px;
-        margin-top: 5px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box; /* Quan trọng để padding không làm tăng chiều rộng */
-      }
-      textarea {
-        resize: vertical;
-      }
-      button {
-        background-color: #4caf50;
-        color: white;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-        margin-top: 20px;
-        font-size: 16px;
-      }
-      button:hover {
-        background-color: #45a049;
-      }
-      .message {
-        margin-top: 15px;
-        text-align: center;
-        color: green;
-        font-weight: bold;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h2>📝 Đăng Ký Lịch Họp</h2>
+      <div class="form-container">
+        <h2 class="mb-4 text-center text-primary">📝 Đăng Ký Lịch Họp</h2>
 
-      <form id="meetingForm">
-        <label for="tenhop">Tên cuộc họp:</label>
-        <input type="text" id="tenhop" name="tenhop" required />
+        <form id="meetingForm">
+          <div class="mb-3">
+            <label for="tenhop" class="form-label fw-bold">Tên cuộc họp:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="tenhop"
+              name="tenhop"
+              required
+            />
+          </div>
 
-        <label for="phong">Phòng họp:</label>
-        <input type="text" id="phong" name="phong" required />
+          <div class="mb-3">
+            <label for="phong" class="form-label fw-bold">Phòng họp:</label>
+            <select
+              class="form-select"
+              id="phong"
+              name="phong"
+              required
+              onchange="toggleOtherRoom(this.value)"
+            >
+              <option value="">-- Chọn phòng họp --</option>
+              <option value="Phòng họp 3.6">Phòng họp 3.6</option>
+              <option value="Hội trường">Hội trường</option>
+              <option value="Phòng truyền thống">Phòng truyền thống</option>
+              <option value="Khác...">Khác...</option>
+            </select>
 
-        <label for="ngaygio">Ngày giờ (Start time):</label>
-        <input type="datetime-local" id="ngaygio" name="ngaygio" required />
+            <input
+              type="text"
+              class="form-control mt-2"
+              id="phongKhac"
+              name="phong"
+              placeholder="Nhập tên phòng họp khác..."
+              style="display: none"
+              disabled
+            />
+          </div>
 
-        <label for="chutri">Chủ trì:</label>
-        <input type="text" id="chutri" name="chutri" required />
+          <div class="mb-3">
+            <label for="ngaygio" class="form-label fw-bold"
+              >Ngày giờ (Start time):</label
+            >
+            <input
+              type="datetime-local"
+              class="form-control"
+              id="ngaygio"
+              name="ngaygio"
+              required
+            />
+          </div>
 
-        <label for="thanhphan"
-          >Thành phần tham dự (Ngăn cách bằng dấu phẩy):</label
-        >
-        <input type="text" id="thanhphan" name="thanhphan" />
+          <div class="mb-3">
+            <label for="chutri" class="form-label fw-bold">Chủ trì:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="chutri"
+              name="chutri"
+              required
+            />
+          </div>
 
-        <label for="noidung">Nội dung/Mục tiêu:</label>
-        <textarea id="noidung" name="noidung" rows="4"></textarea>
+          <div class="mb-3">
+            <label for="thanhphan" class="form-label fw-bold"
+              >Thành phần tham dự:</label
+            >
+            <textarea
+              class="form-control"
+              id="thanhphan"
+              name="thanhphan"
+              rows="3"
+            ></textarea>
+          </div>
 
-        <button type="submit">Lưu Lịch Họp</button>
+          <div class="mb-4">
+            <label for="noidung" class="form-label fw-bold"
+              >Nội dung/Mục tiêu:</label
+            >
+            <textarea
+              class="form-control"
+              id="noidung"
+              name="noidung"
+              rows="4"
+            ></textarea>
+          </div>
 
-        <p class="message" id="formMessage" style="display: none"></p>
-      </form>
+          <button type="submit" class="btn btn-success btn-lg w-100">
+            Lưu Lịch Họp
+          </button>
+
+          <p
+            class="message mt-3 text-center"
+            id="formMessage"
+            style="display: none"
+          ></p>
+        </form>
+      </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
+      // Hàm hiển thị/ẩn input "Phòng họp khác"
+      function toggleOtherRoom(selectedValue) {
+        const otherRoomInput = document.getElementById("phongKhac");
+        const mainSelect = document.getElementById("phong");
+
+        if (selectedValue === "Khác...") {
+          otherRoomInput.style.display = "block";
+          otherRoomInput.disabled = false;
+          otherRoomInput.required = true;
+          mainSelect.disabled = true; // Tắt select khi dùng input khác
+        } else {
+          otherRoomInput.style.display = "none";
+          otherRoomInput.disabled = true;
+          otherRoomInput.required = false;
+          mainSelect.disabled = false;
+        }
+      }
+
       const form = document.getElementById("meetingForm");
       const message = document.getElementById("formMessage");
 
       form.addEventListener("submit", function (e) {
-        e.preventDefault(); // Ngăn chặn hành vi gửi form mặc định
+        e.preventDefault();
 
-        // 1. Lấy dữ liệu từ form
-        const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => {
-          data[key] = value;
-        });
+        // Cần thay thế bằng URL Google Apps Script đã triển khai của bạn
+        const scriptUrl = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
-        // 2. Định nghĩa URL của Google Apps Script (Sẽ tạo ở bước 2)
-        // **CẦN THAY THẾ CHỖ NÀY BẰNG URL ĐÃ TRIỂN KHAI CỦA BẠN**
-        const scriptUrl =
-          "https://script.google.com/macros/s/AKfycbyOlz9qOG97wmlIW2ahqBhU2GXt8ex4syo7RnFKl8LozIWbWb-OGj4IL3VqXX64FXnJdA/exec";
+        let dataToSubmit = new FormData(form);
 
-        // 3. Gửi dữ liệu bằng Fetch API
+        // Xử lý trường "phong" khi chọn "Khác..."
+        const selectedPhong = document.getElementById("phong").value;
+        const otherPhong = document.getElementById("phongKhac").value;
+
+        if (selectedPhong === "Khác...") {
+          // Giá trị thực sự là từ input "phongKhac"
+          dataToSubmit.set("phong", otherPhong);
+        } else {
+          // Đảm bảo giá trị là từ select box
+          dataToSubmit.set("phong", selectedPhong);
+        }
+
+        // Gửi dữ liệu bằng Fetch API
         fetch(scriptUrl, {
           method: "POST",
-          mode: "no-cors", // Cần thiết khi gửi từ form HTML thông thường đến Apps Script
+          mode: "no-cors",
           cache: "no-cache",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: new URLSearchParams(formData), // Gửi dữ liệu dưới dạng URL-encoded
+          body: new URLSearchParams(dataToSubmit),
         })
           .then(() => {
             // Xử lý thành công
             message.textContent = "✅ Đăng ký lịch họp thành công!";
+            message.classList.remove("text-danger");
+            message.classList.add("text-success");
             message.style.display = "block";
-            form.reset(); // Xóa dữ liệu trên form
+            form.reset();
+
+            // Khôi phục trạng thái ban đầu của các trường đặc biệt
+            document.getElementById("phong").disabled = false;
+            toggleOtherRoom("");
+
             setTimeout(() => {
               message.style.display = "none";
-            }, 5000); // Ẩn thông báo sau 5 giây
+            }, 5000);
           })
           .catch((error) => {
-            // Xử lý lỗi (Thường khó bắt lỗi chi tiết với mode 'no-cors')
             console.error("Lỗi khi gửi dữ liệu:", error);
             message.textContent = "❌ Đã xảy ra lỗi khi gửi. Vui lòng thử lại.";
-            message.style.color = "red";
+            message.classList.remove("text-success");
+            message.classList.add("text-danger");
             message.style.display = "block";
           });
       });
