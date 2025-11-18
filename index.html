@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Form Đăng Ký Lịch Họp - Bootstrap</title>
+    <title>Form Đăng Ký Lịch Họp - Bootstrap Cập Nhật</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -42,7 +42,7 @@
             <select
               class="form-select"
               id="phong"
-              name="phong"
+              name="phong_select"
               required
               onchange="toggleOtherRoom(this.value)"
             >
@@ -57,7 +57,7 @@
               type="text"
               class="form-control mt-2"
               id="phongKhac"
-              name="phong"
+              name="phong_input"
               placeholder="Nhập tên phòng họp khác..."
               style="display: none"
               disabled
@@ -137,12 +137,12 @@
           otherRoomInput.style.display = "block";
           otherRoomInput.disabled = false;
           otherRoomInput.required = true;
-          mainSelect.disabled = true; // Tắt select khi dùng input khác
+          mainSelect.required = false; // Tắt yêu cầu trên select khi dùng input khác
         } else {
           otherRoomInput.style.display = "none";
           otherRoomInput.disabled = true;
           otherRoomInput.required = false;
-          mainSelect.disabled = false;
+          mainSelect.required = true;
         }
       }
 
@@ -152,25 +152,33 @@
       form.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        // Cần thay thế bằng URL Google Apps Script đã triển khai của bạn
+        // **THAY THẾ URL NÀY BẰNG URL Google Apps Script ĐÃ TRIỂN KHAI CỦA BẠN**
         const scriptUrl =
           "https://script.google.com/macros/s/AKfycbyOlz9qOG97wmlIW2ahqBhU2GXt8ex4syo7RnFKl8LozIWbWb-OGj4IL3VqXX64FXnJdA/exec";
 
+        // 1. Lấy dữ liệu
         let dataToSubmit = new FormData(form);
 
-        // Xử lý trường "phong" khi chọn "Khác..."
+        // 2. Xử lý trường "phong" để chỉ gửi một giá trị duy nhất (quan trọng!)
         const selectedPhong = document.getElementById("phong").value;
         const otherPhong = document.getElementById("phongKhac").value;
 
+        let finalPhongValue = selectedPhong;
+
         if (selectedPhong === "Khác...") {
-          // Giá trị thực sự là từ input "phongKhac"
-          dataToSubmit.set("phong", otherPhong);
-        } else {
-          // Đảm bảo giá trị là từ select box
-          dataToSubmit.set("phong", selectedPhong);
+          finalPhongValue = otherPhong;
         }
 
-        // Gửi dữ liệu bằng Fetch API
+        // Tái tạo FormData để chỉ có một trường 'phong' được gửi đi
+        const payload = new FormData();
+        payload.append("tenhop", dataToSubmit.get("tenhop"));
+        payload.append("phong", finalPhongValue); // Gửi giá trị đã xử lý
+        payload.append("ngaygio", dataToSubmit.get("ngaygio"));
+        payload.append("chutri", dataToSubmit.get("chutri"));
+        payload.append("thanhphan", dataToSubmit.get("thanhphan"));
+        payload.append("noidung", dataToSubmit.get("noidung"));
+
+        // 3. Gửi dữ liệu
         fetch(scriptUrl, {
           method: "POST",
           mode: "no-cors",
@@ -178,18 +186,17 @@
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: new URLSearchParams(dataToSubmit),
+          body: new URLSearchParams(payload),
         })
           .then(() => {
-            // Xử lý thành công
             message.textContent = "✅ Đăng ký lịch họp thành công!";
             message.classList.remove("text-danger");
             message.classList.add("text-success");
             message.style.display = "block";
             form.reset();
 
-            // Khôi phục trạng thái ban đầu của các trường đặc biệt
             document.getElementById("phong").disabled = false;
+            document.getElementById("phong").required = true;
             toggleOtherRoom("");
 
             setTimeout(() => {
