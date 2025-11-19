@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Form Đăng Ký Lịch Họp - Bootstrap Cập Nhật</title>
+    <title>Form Đăng Ký Lịch Họp - Tách Ngày & Giờ</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -64,17 +64,30 @@
             />
           </div>
 
-          <div class="mb-3">
-            <label for="ngaygio" class="form-label fw-bold"
-              >Ngày giờ (Start time):</label
-            >
-            <input
-              type="datetime-local"
-              class="form-control"
-              id="ngaygio"
-              name="ngaygio"
-              required
-            />
+          <div class="row mb-3">
+            <label class="form-label fw-bold">Ngày giờ họp:</label>
+            <div class="col-6">
+              <label for="ngay" class="form-label text-muted small"
+                >Ngày:</label
+              >
+              <input
+                type="date"
+                class="form-control"
+                id="ngay"
+                name="ngay"
+                required
+              />
+            </div>
+            <div class="col-6">
+              <label for="gio" class="form-label text-muted small">Giờ:</label>
+              <input
+                type="time"
+                class="form-control"
+                id="gio"
+                name="gio"
+                required
+              />
+            </div>
           </div>
 
           <div class="mb-3">
@@ -127,8 +140,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    ### 2. Mã JavaScript Cập Nhật (Quan trọng: Ghép Ngày + Giờ) Phần này là nơi
+    tôi sẽ xử lý việc **ghép giá trị** của input `ngay` (ví dụ: `2025-11-20`) và
+    input `gio` (ví dụ: `14:30`) thành chuỗi chuẩn **ISO 8601** (ví dụ:
+    `2025-11-20T14:30`) mà Google Sheets có thể nhận và chuyển đổi thành định
+    dạng ngày giờ chuẩn. ```javascript
     <script>
-      // Hàm hiển thị/ẩn input "Phòng họp khác"
+      // Hàm hiển thị/ẩn input "Phòng họp khác" (Giữ nguyên)
       function toggleOtherRoom(selectedValue) {
         const otherRoomInput = document.getElementById("phongKhac");
         const mainSelect = document.getElementById("phong");
@@ -137,7 +155,7 @@
           otherRoomInput.style.display = "block";
           otherRoomInput.disabled = false;
           otherRoomInput.required = true;
-          mainSelect.required = false; // Tắt yêu cầu trên select khi dùng input khác
+          mainSelect.required = false;
         } else {
           otherRoomInput.style.display = "none";
           otherRoomInput.disabled = true;
@@ -154,31 +172,33 @@
 
         // **THAY THẾ URL NÀY BẰNG URL Google Apps Script ĐÃ TRIỂN KHAI CỦA BẠN**
         const scriptUrl =
-          "https://script.google.com/macros/s/AKfycbyOlz9qOG97wmlIW2ahqBhU2GXt8ex4syo7RnFKl8LozIWbWb-OGj4IL3VqXX64FXnJdA/exec";
+          "https://script.google.com/macros/s/AKfycbyOlz9qOG97wmlIW2ahqBhU2GXt8ex4syo7RnFKl8LozIWbWb-OGj4IL3VqXX64FXnJdA/execHERE";
 
-        // 1. Lấy dữ liệu
+        // 1. Lấy dữ liệu thô
         let dataToSubmit = new FormData(form);
 
-        // 2. Xử lý trường "phong" để chỉ gửi một giá trị duy nhất (quan trọng!)
+        // 2. Xử lý trường 'phong'
         const selectedPhong = document.getElementById("phong").value;
         const otherPhong = document.getElementById("phongKhac").value;
+        let finalPhongValue =
+          selectedPhong === "Khác..." ? otherPhong : selectedPhong;
 
-        let finalPhongValue = selectedPhong;
+        // 3. ✅ XỬ LÝ GHÉP NGÀY VÀ GIỜ (Mới)
+        const ngay = dataToSubmit.get("ngay");
+        const gio = dataToSubmit.get("gio");
+        // Tạo chuỗi ISO 8601: "YYYY-MM-DDTHH:MM" (Ví dụ: "2025-11-20T14:30")
+        const ngayGioValue = ngay + "T" + gio;
 
-        if (selectedPhong === "Khác...") {
-          finalPhongValue = otherPhong;
-        }
-
-        // Tái tạo FormData để chỉ có một trường 'phong' được gửi đi
+        // 4. Tạo payload cuối cùng để gửi đi
         const payload = new FormData();
         payload.append("tenhop", dataToSubmit.get("tenhop"));
-        payload.append("phong", finalPhongValue); // Gửi giá trị đã xử lý
-        payload.append("ngaygio", dataToSubmit.get("ngaygio"));
+        payload.append("phong", finalPhongValue);
+        payload.append("ngaygio", ngayGioValue); // Gửi chuỗi đã ghép
         payload.append("chutri", dataToSubmit.get("chutri"));
         payload.append("thanhphan", dataToSubmit.get("thanhphan"));
         payload.append("noidung", dataToSubmit.get("noidung"));
 
-        // 3. Gửi dữ liệu
+        // 5. Gửi dữ liệu
         fetch(scriptUrl, {
           method: "POST",
           mode: "no-cors",
@@ -195,7 +215,7 @@
             message.style.display = "block";
             form.reset();
 
-            document.getElementById("phong").disabled = false;
+            // Khôi phục trạng thái
             document.getElementById("phong").required = true;
             toggleOtherRoom("");
 
