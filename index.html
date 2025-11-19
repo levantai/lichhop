@@ -135,98 +135,114 @@
             style="display: none"
           ></p>
         </form>
+        <!--  -->
+
+        <button id="viewDataBtn" class="btn btn-info btn-lg w-100 mt-3">
+          🔎 Xem Lịch Họp Đã Đăng Ký
+        </button>
+
+        <!-- <div id="meetingTableContainer" class="mt-4" style="display: none"> -->
+        <h4 class="text-secondary mb-3">Danh sách Lịch Họp Hiện Tại</h4>
       </div>
     </div>
 
- <script>
-    // Hàm hiển thị/ẩn input "Phòng họp khác"
-    function toggleOtherRoom(selectedValue) {
-        const otherRoomInput = document.getElementById('phongKhac');
-        const mainSelect = document.getElementById('phong');
+    <script>
+      // ... (Toàn bộ hàm toggleOtherRoom và form.addEventListener('submit') của bạn ở đây) ...
 
-        if (selectedValue === 'Khác...') {
-            otherRoomInput.style.display = 'block';
-            otherRoomInput.disabled = false;
-            otherRoomInput.required = true;
-            mainSelect.required = false; 
-        } else {
-            otherRoomInput.style.display = 'none';
-            otherRoomInput.disabled = true;
-            otherRoomInput.required = false;
-            mainSelect.required = true;
+      // Khởi tạo các phần tử mới
+      const viewDataBtn = document.getElementById("viewDataBtn");
+      const tableContainer = document.getElementById("meetingTableContainer");
+
+      // **THAY THẾ URL NÀY BẰNG URL Google Apps Script ĐÃ TRIỂN KHAI CỦA BẠN**
+      const scriptUrl =
+        "https://script.google.com/macros/s/AKfycbyOlz9qOG97wmlIW2ahqBhU2GXt8ex4syo7RnFKl8LozIWbWb-OGj4IL3VqXX64FXnJdA/exec";
+
+      // Hàm đọc dữ liệu từ Apps Script
+      async function fetchMeetingData() {
+        // Hiển thị thông báo đang tải
+        tableContainer.innerHTML =
+          '<div class="text-center text-primary"><div class="spinner-border" role="status"></div> Đang tải dữ liệu...</div>';
+        tableContainer.style.display = "block";
+
+        try {
+          // Yêu cầu GET để đọc dữ liệu
+          const response = await fetch(scriptUrl);
+
+          // Xử lý response từ Apps Script (Lưu ý: Apps Script trả về JSON Text)
+          const text = await response.text();
+          const data = JSON.parse(text);
+
+          if (data.data && data.data.length > 0) {
+            drawTable(data.headers, data.data);
+          } else {
+            tableContainer.innerHTML =
+              '<div class="alert alert-warning text-center">Chưa có lịch họp nào được đăng ký.</div>';
+          }
+        } catch (error) {
+          console.error("Lỗi khi tải dữ liệu:", error);
+          tableContainer.innerHTML =
+            '<div class="alert alert-danger">Lỗi khi kết nối hoặc đọc dữ liệu. Vui lòng kiểm tra lại Apps Script.</div>';
         }
-    }
+      }
 
-    const form = document.getElementById('meetingForm');
-    const message = document.getElementById('formMessage');
+      // Hàm vẽ bảng HTML/Bootstrap
+      function drawTable(headers, data) {
+        let tableHTML = `
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-sm">
+                    <thead class="table-primary">
+                        <tr>
+        `;
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault(); 
-        
-        // ***************************************************************
-        // VUI LÒNG CẬP NHẬT URL NÀY BẰNG URL Google Apps Script ĐÃ TRIỂN KHAI CỦA BẠN
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbyOlz9qOG97wmlIW2ahqBhU2GXt8ex4syo7RnFKl8LozIWbWb-OGj4IL3VqXX64FXnJdA/exec'; 
-        // ***************************************************************
-
-        // 1. Lấy dữ liệu thô từ form (bao gồm cả 'ngay', 'gio', 'phong_select', 'phong_input')
-        let dataToSubmit = new FormData(form);
-        
-        // 2. Xử lý trường 'phong' (Chọn giá trị từ select hoặc input Khác)
-        const selectedPhong = document.getElementById('phong').value;
-        const otherPhong = document.getElementById('phongKhac').value;
-        let finalPhongValue = (selectedPhong === 'Khác...') ? otherPhong : selectedPhong;
-        
-        // 3. XỬ LÝ GHÉP NGÀY VÀ GIỜ
-        const ngay = dataToSubmit.get('ngay');
-        const gio = dataToSubmit.get('gio');
-        
-        // Ghép thành chuỗi chuẩn ISO 8601: "YYYY-MM-DDTHH:MM" (Ví dụ: "2025-11-20T14:30")
-        const ngayGioValue = ngay + 'T' + gio; 
-
-        // 4. Tạo Payload cuối cùng (FormData) để gửi đi, đảm bảo TÊN TRƯỜNG khớp với Google Sheet
-        const payload = new FormData();
-        payload.append('tenhop', dataToSubmit.get('tenhop'));
-        payload.append('phong', finalPhongValue);        // Tên cột trong Sheet
-        payload.append('ngaygio', ngayGioValue);          // Tên cột trong Sheet
-        payload.append('chutri', dataToSubmit.get('chutri'));
-        payload.append('thanhphan', dataToSubmit.get('thanhphan'));
-        payload.append('noidung', dataToSubmit.get('noidung'));
-
-        // 5. Gửi dữ liệu bằng Fetch API
-        fetch(scriptUrl, {
-            method: 'POST',
-            mode: 'no-cors', 
-            cache: 'no-cache',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams(payload)
-        })
-        .then(() => {
-            // Xử lý thành công
-            message.textContent = '✅ Đăng ký lịch họp thành công!';
-            message.classList.remove('text-danger');
-            message.classList.add('text-success');
-            message.style.display = 'block';
-            form.reset(); 
-            
-            // Khôi phục trạng thái ban đầu
-            document.getElementById('phong').required = true;
-            toggleOtherRoom(''); 
-            
-            setTimeout(() => { message.style.display = 'none'; }, 5000); 
-        })
-        .catch(error => {
-            // Xử lý lỗi (Thường không chi tiết với no-cors, nhưng vẫn hiển thị lỗi chung)
-            console.error('Lỗi khi gửi dữ liệu:', error);
-            message.textContent = '❌ Đã xảy ra lỗi khi gửi. Vui lòng thử lại.';
-            message.classList.remove('text-success');
-            message.classList.add('text-danger');
-            message.style.display = 'block';
+        // Vẽ tiêu đề cột
+        headers.forEach((header) => {
+          // Lược bỏ cột 'timestamp' và 'noidung' cho bảng tóm tắt
+          if (
+            header.toLowerCase() !== "timestamp" &&
+            header.toLowerCase() !== "noidung"
+          ) {
+            tableHTML += `<th>${
+              header.charAt(0).toUpperCase() + header.slice(1)
+            }</th>`;
+          }
         });
-    });
-</script>
+
+        tableHTML += `
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        // Vẽ từng hàng dữ liệu
+        data.forEach((row) => {
+          tableHTML += "<tr>";
+          headers.forEach((header) => {
+            const headerLower = header.toLowerCase();
+            // Lược bỏ cột 'timestamp' và 'noidung'
+            if (headerLower !== "timestamp" && headerLower !== "noidung") {
+              // Hiển thị ngày giờ và làm đẹp
+              if (headerLower === "ngaygio") {
+                // row[header] đã được format ở Apps Script thành "dd-MM-yyyy HH:mm"
+                tableHTML += `<td>${row[header]}</td>`;
+              } else {
+                tableHTML += `<td>${row[header] || ""}</td>`;
+              }
+            }
+          });
+          tableHTML += "</tr>";
+        });
+
+        tableHTML += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        tableContainer.innerHTML = tableHTML;
+      }
+
+      // Gán sự kiện cho nút "Xem Lịch Họp"
+      viewDataBtn.addEventListener("click", fetchMeetingData);
+    </script>
   </body>
 </html>
-
-
